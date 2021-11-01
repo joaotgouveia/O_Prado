@@ -10,7 +10,10 @@ def cria_posicao(iX, iY):
     return (iX, iY)
 
 def cria_copia_posicao(pPosicao):
-    return pPosicao
+    if eh_posicao(pPosicao):
+        return cria_posicao(obter_pos_x(pPosicao), obter_pos_y(pPosicao))
+    raise ValueError("cria_copia_posicao: argumentos invalidos")
+
 
 # Seletores
 
