@@ -10,10 +10,9 @@ def cria_posicao(iX, iY):
     return (iX, iY)
 
 def cria_copia_posicao(pPosicao):
-    if eh_posicao(pPosicao):
-        return cria_posicao(obter_pos_x(pPosicao), obter_pos_y(pPosicao))
-    raise ValueError("cria_copia_posicao: argumentos invalidos")
-
+    if not eh_posicao(pPosicao):
+        raise ValueError("cria_copia_posicao: argumentos invalidos")
+    return pPosicao
 
 # Seletores
 
@@ -79,3 +78,37 @@ def ordenar_posicoes(tPosicoes):
         iIntervalo //= 2
     
     return tuple(lPosicoes)
+
+# 2.1.2 TAD animal
+
+# Construtores
+
+def cria_animal(sEspecie, iFreqReproducao, iFreqAlimentacao):
+    if type(sEspecie) != str or type(iFreqReproducao) != int or type(iFreqAlimentacao) != int:
+        raise ValueError("cria_animal: argumentos invalidos")
+    if len(sEspecie) < 1 or iFreqReproducao <= 0 or iFreqAlimentacao < 0:
+        raise ValueError("cria_animal: argumentos invalidos")
+    for char in sEspecie:
+        if not char.isalpha():
+            raise ValueError("cria_animal: argumentos invalidos")
+    return {"Especie": sEspecie, "FreqReproducao": iFreqReproducao, "FreqAlimentacao": iFreqAlimentacao, "Fome": 0, "Idade": 0}
+
+def cria_copia_animal(aAnimal):
+    return aAnimal
+
+# Seletores
+
+def obter_especie(aAnimal):
+    return aAnimal["Especie"]
+
+def obter_freq_reproducao(aAnimal):
+    return aAnimal["FreqReproducao"]
+
+def obter_freq_alimentacao(aAnimal):
+    return aAnimal["FreqAlimentacao"]
+
+def obter_idade(aAnimal):
+    return aAnimal["Idade"]
+
+def obter_fome(aAnimal):
+    return aAnimal["Fome"]
