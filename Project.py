@@ -61,7 +61,6 @@ def ordenar_posicoes(tPosicoes):
     lPosicoes = list(tPosicoes)
     iIntervalo = len(tPosicoes) // 2
     bMudou = True
-    # Ordenamento Shell
     while iIntervalo != 0:
         while bMudou:
             bMudou = False
@@ -74,7 +73,6 @@ def ordenar_posicoes(tPosicoes):
                         lPosicoes[i], lPosicoes[i + iIntervalo] = lPosicoes[i + iIntervalo], lPosicoes[i]
                         bMudou = True
         iIntervalo //= 2
-    
     return tuple(lPosicoes)
 
 # 2.1.2 TAD animal
@@ -205,19 +203,79 @@ def reproduz_animal(aAnimal):
     reset_idade(aAnimal)
     return cria_animal(obter_especie(aAnimal), obter_freq_reproducao(aAnimal), obter_freq_alimentacao(aAnimal))
 
-r1 = cria_animal("rabbit", 5, 0)
-f1 = cria_animal("fox", 20, 10)
-print(animal_para_str(r1))
-print(animal_para_str(f1))
-print(animal_para_char(r1))
-print(animal_para_char(f1))
-f2 = cria_copia_animal(f1)
-f2 = aumenta_idade(aumenta_idade(f2))
-f2 = aumenta_fome(f2)
-print(animal_para_str(f1))
-print(animal_para_str(f2))
-print(animais_iguais(f1, f2))
-f3 = reproduz_animal(f2)
-print(animal_para_str(f2))
-print(animal_para_str(f3))
+# TAD prado
 
+# Construtores
+
+def cria_prado(pPosicao, tObstaculos, tAnimais, tPosAnimais):
+    if not eh_posicao(pPosicao):
+        raise ValueError("cria_prado: argumentos invalidos")
+    if type(tObstaculos) != tuple or type(tAnimais) != tuple or type(tPosAnimais) != tuple:
+        raise ValueError("cria_prado: argumentos invalidos")
+    for posicao in tObstaculos:
+        if not eh_posicao(posicao):
+            raise ValueError("cria_prado: argumentos invalidos")
+    if len(tAnimais) != len(tPosAnimais):
+        raise ValueError("cria_prado: argumentos invalidos")
+    for animal in tAnimais:
+        if not eh_animal(animal):
+            raise ValueError("cria_prado: argumentos invalidos")
+    for posicao in tPosAnimais:
+        if not eh_posicao(posicao):
+            raise ValueError("cria_prado: argumentos invalidos")
+    
+    return {["PosCanto"]: pPosicao, ["Obstaculos"]: tObstaculos, ["Animais"]: tAnimais, ["PosAnimais"]: tPosAnimais}
+
+def copia_prado(prPrado):
+    return dict(prPrado)
+
+# Seletores
+
+def obter_tamanho_x(prPrado):
+    return obter_pos_x(prPrado["PosCanto"])
+
+def obter_tamanho_y(prPrado):
+    return obter_pos_y(prPrado["PosCanto"])
+
+def obter_numero_predadores(prPrado):
+    iNumPredadores = 0
+    for animal in prPrado["Animais"]:
+        if eh_predador(animal):
+            iNumPredadores += 1
+    return iNumPredadores
+
+def obter_numero_presas(prPrado):
+    iNumPresas = 0
+    for animal in prPrado["Animais"]:
+        if eh_presa(animal):
+            iNumPresas += 1
+    return iNumPresas
+
+def obter_posicao_animais(prPrado):
+    return ordenar_posicoes(prPrado["PosAnimais"])
+
+def obter_animal(prPrado, pPosicao):
+    for i in range(len(prPrado["PosAnimais"])):
+        if posicoes_iguais(prPrado["PosAnimais"][i], pPosicao):
+            return prPrado["Animais"][i]
+
+# Modificadores
+
+def elimina_animal(prPrado, pPosicao):
+    lAnimais = list(prPrado["Animais"])
+    lPosAnimais = list(prPrado["PosAnimais"])
+    del lAnimais[lPosAnimais.index(pPosicao)]
+    del lPosAnimais[lPosAnimais.index(pPosicao)]
+    prPrado["Animais"] = tuple(lAnimais)
+    prPrado["PosAnimais"] = tuple(lPosAnimais)
+
+def mover_animal(prPrado, pPosAnimal, pPosNova):
+    lPosAnimais = list(prPrado["PosAnimais"])
+    lPosAnimais[lPosAnimais.index(pPosAnimal)] = pPosNova
+    prPrado["PosAnimais"] = tuple(lPosAnimais)
+    return prPrado
+
+def inserir_animal(prPrado, aAnimal, pPosicao):
+    prPrado["Animais"] += (aAnimal, )
+    prPrado["PosAnimais"] += (pPosicao, )
+    return prPrado
