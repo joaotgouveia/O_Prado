@@ -10,8 +10,6 @@ def cria_posicao(iX, iY):
     return (iX, iY)
 
 def cria_copia_posicao(pPosicao):
-    if not eh_posicao(pPosicao):
-        raise ValueError("cria_copia_posicao: argumentos invalidos")
     return pPosicao
 
 # Seletores
@@ -94,7 +92,7 @@ def cria_animal(sEspecie, iFreqReproducao, iFreqAlimentacao):
     return {"Especie": sEspecie, "FreqReproducao": iFreqReproducao, "FreqAlimentacao": iFreqAlimentacao, "Fome": 0, "Idade": 0}
 
 def cria_copia_animal(aAnimal):
-    return aAnimal
+    return dict(aAnimal)
 
 # Seletores
 
@@ -112,3 +110,114 @@ def obter_idade(aAnimal):
 
 def obter_fome(aAnimal):
     return aAnimal["Fome"]
+
+# Modificadores
+
+def aumenta_idade(aAnimal):
+    aAnimal["Idade"] += 1
+    return aAnimal
+
+def reset_idade(aAnimal):
+    aAnimal["Idade"] = 0
+    return aAnimal
+
+def aumenta_fome(aAnimal):
+    if aAnimal["FreqAlimentacao"] != 0:
+        aAnimal["Fome"] += 1
+    return aAnimal
+
+def reset_fome(aAnimal):
+    if aAnimal["FreqAlimentacao"] != 0:
+        aAnimal["Fome"] = 0
+    return aAnimal
+
+# Reconhecedores
+
+def eh_animal(uArg):
+    if type(uArg) != dict:
+        return False
+    if len(uArg) != 5:
+        return False
+    if not "Especie" in uArg.keys() or "FreqReproducao"in uArg.keys() or "FreqAlimentacao"in uArg.keys() or "Fome"in uArg.keys() or "Idade"in uArg.keys():
+        return False
+    if type(obter_especie(uArg)) != str or type(obter_freq_reproducao(uArg)) != int or type(obter_freq_alimentacao(uArg)) != int or type(obter_fome(uArg)) != int or type(obter_idade(uArg)) != int:
+        return False
+    if len(obter_especie(uArg)) == 0:
+        return False
+    for char in obter_especie(uArg):
+        if not char.isalpha():
+            return False
+    if obter_freq_reproducao(uArg) <= 0 or obter_freq_alimentacao(uArg) <= 0 or obter_fome(uArg) < 0 or obter_idade(uArg) < 0:
+        return False
+    return True
+
+def eh_predador(aAnimal):
+    if obter_freq_alimentacao(aAnimal) != 0:
+        return True
+    return False
+
+def eh_presa(aAnimal):
+    return not eh_predador(aAnimal)
+
+# Teste
+
+def animais_iguais(aAnimal1, aAnimal2):
+    if obter_especie(aAnimal1) != obter_especie(aAnimal2):
+        return False
+    if obter_freq_reproducao(aAnimal1) != obter_freq_reproducao(aAnimal2):
+        return False
+    if obter_freq_alimentacao(aAnimal1) != obter_freq_alimentacao(aAnimal2):
+        return False
+    if obter_idade(aAnimal1) != obter_idade(aAnimal2):
+        return False
+    if obter_fome(aAnimal1) != obter_fome(aAnimal2):
+        return False
+    return True
+
+# Transformadores
+
+def animal_para_char(aAnimal):
+    if eh_predador(aAnimal):
+        return obter_especie(aAnimal)[0].upper()
+    return obter_especie(aAnimal)[0].lower()
+
+def animal_para_str(aAnimal):
+    sStrAnimal = obter_especie(aAnimal) + " [" + str(obter_idade(aAnimal)) +"/" + str(obter_freq_reproducao(aAnimal))
+    if eh_predador(aAnimal):
+        return sStrAnimal + ";" + str(obter_fome(aAnimal)) + "/" + str(obter_freq_alimentacao(aAnimal)) + "]"
+    return sStrAnimal + "]"
+
+# Funções de alto nível associadas ao TAD animal
+
+def eh_animal_fertil(aAnimal):
+    if obter_freq_reproducao(aAnimal) <= obter_idade(aAnimal):
+        return True
+    return False
+
+def eh_animal_faminto(aAnimal):
+    if eh_presa(aAnimal):
+        return False
+    if obter_freq_alimentacao(aAnimal) <= obter_fome(aAnimal):
+        return True
+    return False
+
+def reproduz_animal(aAnimal):
+    reset_idade(aAnimal)
+    return cria_animal(obter_especie(aAnimal), obter_freq_reproducao(aAnimal), obter_freq_alimentacao(aAnimal))
+
+r1 = cria_animal("rabbit", 5, 0)
+f1 = cria_animal("fox", 20, 10)
+print(animal_para_str(r1))
+print(animal_para_str(f1))
+print(animal_para_char(r1))
+print(animal_para_char(f1))
+f2 = cria_copia_animal(f1)
+f2 = aumenta_idade(aumenta_idade(f2))
+f2 = aumenta_fome(f2)
+print(animal_para_str(f1))
+print(animal_para_str(f2))
+print(animais_iguais(f1, f2))
+f3 = reproduz_animal(f2)
+print(animal_para_str(f2))
+print(animal_para_str(f3))
+
