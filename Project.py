@@ -1,3 +1,5 @@
+from functools import reduce
+
 # 2.1.1 TAD posicao
 
 # Construtores
@@ -61,6 +63,7 @@ def ordenar_posicoes(tPosicoes):
     lPosicoes = list(tPosicoes)
     iIntervalo = len(tPosicoes) // 2
     bMudou = True
+    # Ordenamento Shell aplicado ao contexto em questão
     while iIntervalo != 0:
         while bMudou:
             bMudou = False
@@ -136,7 +139,7 @@ def eh_animal(uArg):
         return False
     if len(uArg) != 5:
         return False
-    if not "Especie" in uArg.keys() or "FreqReproducao"in uArg.keys() or "FreqAlimentacao"in uArg.keys() or "Fome"in uArg.keys() or "Idade"in uArg.keys():
+    if not "Especie" in uArg.keys() or not "FreqReproducao" in uArg.keys() or not "FreqAlimentacao" in uArg.keys() or not "Fome" in uArg.keys() or not "Idade"in uArg.keys():
         return False
     if type(obter_especie(uArg)) != str or type(obter_freq_reproducao(uArg)) != int or type(obter_freq_alimentacao(uArg)) != int or type(obter_fome(uArg)) != int or type(obter_idade(uArg)) != int:
         return False
@@ -145,7 +148,7 @@ def eh_animal(uArg):
     for char in obter_especie(uArg):
         if not char.isalpha():
             return False
-    if obter_freq_reproducao(uArg) <= 0 or obter_freq_alimentacao(uArg) <= 0 or obter_fome(uArg) < 0 or obter_idade(uArg) < 0:
+    if obter_freq_reproducao(uArg) <= 0 or obter_freq_alimentacao(uArg) < 0 or obter_fome(uArg) < 0 or obter_idade(uArg) < 0:
         return False
     return True
 
@@ -207,12 +210,12 @@ def reproduz_animal(aAnimal):
 
 # Construtores
 
-def cria_prado(pPosicao, tObstaculos, tAnimais, tPosAnimais):
+def cria_prado(pPosicao, tPosObstaculos, tAnimais, tPosAnimais):
     if not eh_posicao(pPosicao):
         raise ValueError("cria_prado: argumentos invalidos")
-    if type(tObstaculos) != tuple or type(tAnimais) != tuple or type(tPosAnimais) != tuple:
+    if type(tPosObstaculos) != tuple or type(tAnimais) != tuple or type(tPosAnimais) != tuple:
         raise ValueError("cria_prado: argumentos invalidos")
-    for posicao in tObstaculos:
+    for posicao in tPosObstaculos:
         if not eh_posicao(posicao):
             raise ValueError("cria_prado: argumentos invalidos")
     if len(tAnimais) != len(tPosAnimais):
@@ -224,7 +227,7 @@ def cria_prado(pPosicao, tObstaculos, tAnimais, tPosAnimais):
         if not eh_posicao(posicao):
             raise ValueError("cria_prado: argumentos invalidos")
     
-    return {["PosCanto"]: pPosicao, ["Obstaculos"]: tObstaculos, ["Animais"]: tAnimais, ["PosAnimais"]: tPosAnimais}
+    return {"PosCanto": pPosicao, "PosObstaculos": tPosObstaculos, "Animais": tAnimais, "PosAnimais": tPosAnimais}
 
 def copia_prado(prPrado):
     return dict(prPrado)
@@ -232,10 +235,10 @@ def copia_prado(prPrado):
 # Seletores
 
 def obter_tamanho_x(prPrado):
-    return obter_pos_x(prPrado["PosCanto"])
+    return obter_pos_x(prPrado["PosCanto"]) + 1 
 
 def obter_tamanho_y(prPrado):
-    return obter_pos_y(prPrado["PosCanto"])
+    return obter_pos_y(prPrado["PosCanto"]) + 1
 
 def obter_numero_predadores(prPrado):
     iNumPredadores = 0
@@ -259,6 +262,9 @@ def obter_animal(prPrado, pPosicao):
         if posicoes_iguais(prPrado["PosAnimais"][i], pPosicao):
             return prPrado["Animais"][i]
 
+def obter_posicao_obstaculos(prPrado):
+    return ordenar_posicoes(prPrado["PosObstaculos"])
+
 # Modificadores
 
 def elimina_animal(prPrado, pPosicao):
@@ -279,3 +285,162 @@ def inserir_animal(prPrado, aAnimal, pPosicao):
     prPrado["Animais"] += (aAnimal, )
     prPrado["PosAnimais"] += (pPosicao, )
     return prPrado
+
+# Reconhecedores
+
+def eh_prado(uArg):
+    if type(uArg) != dict:
+        return False
+    if len(uArg) != 4:
+        return False
+    if not "PosCanto" in uArg.keys() or not "PosObstaculos" in uArg.keys() or not "Animais" in uArg.keys() or not "PosAnimais" in uArg.keys():
+        return False
+    if not eh_posicao(uArg["PosCanto"]):
+        return False
+    if type(uArg["PosObstaculos"]) != tuple or type(uArg["Animais"]) != tuple or type(uArg["PosAnimais"]) != tuple:
+        return False
+    for posicao in uArg["PosObstaculos"]:
+        if not eh_posicao(posicao):
+            return False
+    for animal in uArg["Animais"]:
+        if not eh_animal(animal):
+            return False
+    for posicao in uArg["PosAnimais"]:
+        if not eh_posicao(posicao):
+            return False
+    return True
+
+def eh_posicao_animal(prPrado, pPosicao):
+    for posicao in obter_posicao_animais(prPrado):
+        if posicoes_iguais(posicao, pPosicao):
+            return True
+    return False
+
+def eh_posicao_obstaculo(prPrado, pPosicao):
+    for posicao in obter_posicao_obstaculos(prPrado):
+        if posicoes_iguais(posicao, pPosicao):
+            return True
+    return False
+
+def eh_posicao_livre(prPrado, pPosicao):
+    if eh_posicao_animal(prPrado, pPosicao) or eh_posicao_obstaculo(prPrado, pPosicao):
+        return False
+    return True
+
+# Teste
+
+def prados_iguais(prPrado1, prPrado2):
+    
+    if len(obter_posicao_animais(prPrado1)) != len(obter_posicao_animais(prPrado2)):
+        return False
+    for i in range(len(obter_posicao_animais(prPrado1))):
+        if not posicoes_iguais(obter_posicao_animais(prPrado1)[i], obter_posicao_animais(prPrado2)[i]):
+            return False
+    
+    if len(obter_posicao_obstaculos(prPrado1)) != len(obter_posicao_obstaculos(prPrado2)):
+        return False
+    for i in range(len(obter_posicao_obstaculos(prPrado1))):
+        if not posicoes_iguais(obter_posicao_obstaculos(prPrado1)[i], obter_posicao_obstaculos(prPrado2)[i]):
+            return False
+
+    for i in range(len(obter_posicao_animais(prPrado1))):
+        if not animais_iguais(obter_animal(prPrado1,obter_posicao_animais(prPrado1)[i]), obter_animal(prPrado2,obter_posicao_animais(prPrado2)[i])):
+            return False
+    
+    return True
+
+# Transformador
+
+def prado_para_str(prPrado):
+    lMatrizPrado = [[] for y in range(obter_tamanho_y(prPrado))]
+    sPrado = ""
+    lMatrizPrado[0] = ["-" for x in range(obter_tamanho_x(prPrado))]
+    lMatrizPrado[0][0] = "+"
+    lMatrizPrado[0][-1] = "+"
+    lMatrizPrado[-1] = lMatrizPrado[0]
+
+    for y in range(1, len(lMatrizPrado) - 1):
+        lMatrizPrado[y].append("|")
+        for x in range(1,obter_tamanho_x(prPrado) - 1):
+            if eh_posicao_livre(prPrado, cria_posicao(x,y)):
+                lMatrizPrado[y].append(".")
+            elif eh_posicao_obstaculo(prPrado, cria_posicao(x,y)):
+                lMatrizPrado[y].append("@")
+            else:
+                lMatrizPrado[y].append(animal_para_char(obter_animal(prPrado, cria_posicao(x,y))))
+        lMatrizPrado[y].append("|")
+    
+    for y in range(len(lMatrizPrado)):
+        for char in lMatrizPrado[y]:
+            sPrado += str(char)
+        sPrado += "\n"
+
+    return sPrado.rstrip("\n")
+
+# Funções de alto nível associadas ao TAD prado
+
+def obter_valor_numerico(prPrado, pPosicao):
+    return obter_tamanho_x(prPrado)*obter_pos_y(pPosicao) + obter_pos_x(pPosicao)
+
+def eh_posicao_presa(prPrado, pPosicao):
+    if eh_posicao_animal(prPrado, pPosicao):
+        if eh_presa(obter_animal(prPrado, pPosicao)):
+            return True
+    return False
+
+def ordenar_movimentos(lPosicoes):
+    bMudou = True
+    # Bubbe sort aplicado ao contexto em questão
+    while bMudou:
+        bMudou = False
+        for i in range(len(lPosicoes) - 1):
+            if obter_pos_y(lPosicoes[i]) > obter_pos_y(lPosicoes[i + 1]):
+                lPosicoes[i], lPosicoes[i + 1] = lPosicoes[i + 1], lPosicoes[i]
+                bMudou = True
+
+    bMudou = True
+    while bMudou:
+        bMudou = False
+        for i in range(1, len(lPosicoes) - 1):
+            if obter_pos_x(lPosicoes[i]) < obter_pos_x(lPosicoes[i + 1]):
+                lPosicoes[i], lPosicoes[i + 1] = lPosicoes[i + 1], lPosicoes[i]
+                bMudou = True
+    return lPosicoes
+
+print(ordenar_movimentos([(3,1), (2,0), (1,1), (2,2)]))
+def pos_possiveis(prPrado, pPosicao, aAnimal):
+    if eh_predador(aAnimal):
+        lPosPossiveis = [pos for pos in obter_posicoes_adjacentes(pPosicao)\
+            if obter_pos_x(pos) < obter_tamanho_x(prPrado) - 1\
+            and obter_pos_y(pos) < obter_tamanho_y(prPrado) - 1\
+            and eh_posicao_presa(prPrado, pos)]
+        if lPosPossiveis != []:
+            return lPosPossiveis
+    lPosPossiveis = [pos for pos in obter_posicoes_adjacentes(pPosicao)\
+        if obter_pos_x(pos) < obter_tamanho_x(prPrado) - 1\
+        and obter_pos_y(pos) < obter_tamanho_y(prPrado) - 1\
+        and eh_posicao_livre(prPrado, pos)]
+    if lPosPossiveis != []:
+        return lPosPossiveis
+    return [pPosicao]
+
+def obter_movimento(prPrado, pPosicao):
+    aAnimal = obter_animal(prPrado,pPosicao)
+    lPosPossiveis = ordenar_movimentos(pos_possiveis(prPrado, pPosicao, aAnimal))
+    iValorPos = obter_valor_numerico(prPrado, pPosicao)
+    return lPosPossiveis[iValorPos%(len(lPosPossiveis))]
+
+dim = cria_posicao(11, 4)
+obs = (cria_posicao(4,2), cria_posicao(5,2))
+an1 = tuple(cria_animal("rabbit", 5, 0) for i in range(3))
+an2 = (cria_animal("lynx", 20, 15),)
+pos = tuple(cria_posicao(p[0],p[1]) for p in ((5,1),(7,2),(10,1),(6,1)))
+prado = cria_prado(dim, obs, an1+an2, pos)
+p1 = cria_posicao(7,2)
+p2 = cria_posicao(9,3)
+prado = mover_animal(prado, p1, p2)
+print( obter_valor_numerico(prado, cria_posicao(9,3)))
+
+print(posicao_para_str(obter_movimento(prado, cria_posicao(5,1))))
+print(posicao_para_str(obter_movimento(prado, cria_posicao(6,1))))
+print(posicao_para_str(obter_movimento(prado, cria_posicao(10,1))))
