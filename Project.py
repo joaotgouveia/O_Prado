@@ -61,21 +61,25 @@ def obter_posicoes_adjacentes(pPosicao):
 
 def ordenar_posicoes(tPosicoes):
     lPosicoes = list(tPosicoes)
-    iIntervalo = len(tPosicoes) // 2
     bMudou = True
-    # Ordenamento Shell aplicado ao contexto em questão
-    while iIntervalo != 0:
-        while bMudou:
+    # Bubble sort aplicado ao contexto em questão
+    while bMudou:
             bMudou = False
-            for i in range(len(lPosicoes)-iIntervalo):
-                if obter_pos_y(lPosicoes[i]) > obter_pos_y(lPosicoes[i + iIntervalo]):
-                    lPosicoes[i], lPosicoes[i + iIntervalo] = lPosicoes[i + iIntervalo], lPosicoes[i]
+            for i in range(len(lPosicoes)-1):
+                if obter_pos_y(lPosicoes[i]) > obter_pos_y(lPosicoes[i + 1]):
+                    lPosicoes[i], lPosicoes[i + 1] = lPosicoes[i + 1], lPosicoes[i]
                     bMudou = True
-                if obter_pos_y(lPosicoes[i]) == obter_pos_y(lPosicoes[i + iIntervalo]):
-                    if obter_pos_x(lPosicoes[i]) > obter_pos_x(lPosicoes[i + iIntervalo]):
-                        lPosicoes[i], lPosicoes[i + iIntervalo] = lPosicoes[i + iIntervalo], lPosicoes[i]
-                        bMudou = True
-        iIntervalo //= 2
+
+    bMudou = True
+    # Bubble sort aplicado ao contexto em questão
+    while bMudou:
+        bMudou = False
+        for i in range(len(lPosicoes)-1):
+            if obter_pos_y(lPosicoes[i]) == obter_pos_y(lPosicoes[i + 1]):
+                if obter_pos_x(lPosicoes[i]) > obter_pos_x(lPosicoes[i + 1]):
+                    lPosicoes[i], lPosicoes[i + 1] = lPosicoes[i + 1], lPosicoes[i]
+                    bMudou = True
+
     return tuple(lPosicoes)
 
 # 2.1.2 TAD animal
@@ -128,8 +132,7 @@ def aumenta_fome(aAnimal):
     return aAnimal
 
 def reset_fome(aAnimal):
-    if aAnimal["FreqAlimentacao"] != 0:
-        aAnimal["Fome"] = 0
+    aAnimal["Fome"] = 0
     return aAnimal
 
 # Reconhecedores
@@ -267,13 +270,14 @@ def obter_posicao_obstaculos(prPrado):
 
 # Modificadores
 
-def elimina_animal(prPrado, pPosicao):
+def eliminar_animal(prPrado, pPosicao):
     lAnimais = list(prPrado["Animais"])
     lPosAnimais = list(prPrado["PosAnimais"])
     del lAnimais[lPosAnimais.index(pPosicao)]
     del lPosAnimais[lPosAnimais.index(pPosicao)]
     prPrado["Animais"] = tuple(lAnimais)
     prPrado["PosAnimais"] = tuple(lPosAnimais)
+    return prPrado
 
 def mover_animal(prPrado, pPosAnimal, pPosNova):
     lPosAnimais = list(prPrado["PosAnimais"])
@@ -407,7 +411,6 @@ def ordenar_movimentos(lPosicoes):
                 bMudou = True
     return lPosicoes
 
-print(ordenar_movimentos([(3,1), (2,0), (1,1), (2,2)]))
 def pos_possiveis(prPrado, pPosicao, aAnimal):
     if eh_predador(aAnimal):
         lPosPossiveis = [pos for pos in obter_posicoes_adjacentes(pPosicao)\
@@ -430,17 +433,79 @@ def obter_movimento(prPrado, pPosicao):
     iValorPos = obter_valor_numerico(prPrado, pPosicao)
     return lPosPossiveis[iValorPos%(len(lPosPossiveis))]
 
-dim = cria_posicao(11, 4)
-obs = (cria_posicao(4,2), cria_posicao(5,2))
-an1 = tuple(cria_animal("rabbit", 5, 0) for i in range(3))
-an2 = (cria_animal("lynx", 20, 15),)
-pos = tuple(cria_posicao(p[0],p[1]) for p in ((5,1),(7,2),(10,1),(6,1)))
-prado = cria_prado(dim, obs, an1+an2, pos)
-p1 = cria_posicao(7,2)
-p2 = cria_posicao(9,3)
-prado = mover_animal(prado, p1, p2)
-print( obter_valor_numerico(prado, cria_posicao(9,3)))
+# Funções adicionais
 
-print(posicao_para_str(obter_movimento(prado, cria_posicao(5,1))))
-print(posicao_para_str(obter_movimento(prado, cria_posicao(6,1))))
-print(posicao_para_str(obter_movimento(prado, cria_posicao(10,1))))
+def geracao(prPrado):
+    lPosAnimais = obter_posicao_animais(prPrado)
+    for pos in lPosAnimais:
+        aAnimal = obter_animal(prPrado, pos)
+        pMovimento = obter_movimento(prPrado, pos)
+        aAnimal = aumenta_fome(aAnimal)
+        aAnimal = aumenta_idade(aAnimal)
+        if eh_predador(aAnimal):
+            if eh_posicao_presa(prPrado, pMovimento):
+                eliminar_animal(prPrado, pMovimento)
+                aAnimal = reset_fome(aAnimal)
+                prPrado = mover_animal(prPrado, pos, pMovimento)
+                if eh_animal_fertil(aAnimal):
+                    aCria = reproduz_animal(aAnimal)
+                    prPrado = inserir_animal(prPrado, aCria, pos)
+            else:
+                if not posicoes_iguais(pos, pMovimento):
+                    prPrado = mover_animal(prPrado, pos, pMovimento)
+                    if eh_animal_fertil(aAnimal):
+                        aCria = reproduz_animal(aAnimal)
+                        prPrado = inserir_animal(prPrado, aCria, pos)
+            if eh_animal_faminto(aAnimal):
+                prPrado = eliminar_animal(prPrado, aAnimal)
+        if eh_presa(aAnimal):
+            if not posicoes_iguais(pos, pMovimento):
+                prPrado = mover_animal(prPrado, pos, pMovimento)
+                if eh_animal_fertil(aAnimal):
+                    aCria = reproduz_animal(aAnimal)
+                    prPrado = inserir_animal(prPrado, aCria, pos)
+                
+    return prPrado
+
+def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
+    fConfig = open(sFicheiro, 'r')
+    sLinha = fConfig.readline()
+    sX = ""
+    sY = ""
+
+    for i in range(1, len(sLinha)):
+        if sLinha[i].isdigit():
+            sX += sLinha[i]
+        else:
+            break
+    
+    for i in range(i + 3, len(sLinha)):
+        if sLinha[i].isdigit():
+            sY += sLinha[i]
+        else:
+            break
+    
+    pCanto = cria_posicao(int(sX), int(sY))
+
+    sLinha = fConfig.readline()
+    tPosObstaculos = ()
+    for t in range(2, len(sLinha), 5):
+        sX = ""
+        sY = ""
+
+        for i in range(1, len(sLinha)):
+            if sLinha[i].isdigit():
+                sX += sLinha[i]
+            else:
+                break
+    
+        for i in range(i + 3, len(sLinha)):
+            if sLinha[i].isdigit():
+                sY += sLinha[i]
+            else:
+                break
+        
+        tPosObstaculos += ((int(sX), int(sY)), )
+
+
+
