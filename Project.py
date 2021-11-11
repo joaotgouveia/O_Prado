@@ -497,7 +497,6 @@ def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
     for i in range(1, len(sLinha)):
         sX = ""
         sY = ""
-        #Implementar detetar parentesis aberto que inicia tuplo e parentesis fechado que termina tuplo
         if sLinha[i] == "(":
             for j in range(i + 1, len(sLinha)):
                 if sLinha[j].isnumeric():
@@ -513,8 +512,28 @@ def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
                     break
         
             tPosObstaculos += (cria_posicao(int(sX), int(sY)), )
-    return tPosObstaculos, pCanto
+    
+    tAnimais = ()
+    for line in fConfig:
+        sEspecie = ""
+        sFreqReproducao = ""
+        sFreqAlimentacao = ""
+        if sLinha[i] == "(":
+            for j in range(i + 1, len(sLinha)):
+                if sLinha[j].isnumeric():
+                    sX += sLinha[j]
+                else:
+                    iIndiceInicial = j
+                    break
+    
+            for j in range(iIndiceInicial + 2, len(sLinha)):
+                if sLinha[j].isnumeric():
+                    sY += sLinha[j]
+                else:
+                    break
+        
+            tAnimais += (cria_animal(),)
 
-print(simula_ecossistema("config.txt", 1, 2))
+
 
 
