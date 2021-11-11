@@ -12,7 +12,11 @@ def cria_posicao(iX, iY):
     return (iX, iY)
 
 def cria_copia_posicao(pPosicao):
-    return pPosicao
+    if type(pPosicao) != tuple:
+        raise ValueError("cria_copia_posicao: argumentos invalidos")
+    if len(pPosicao) != 2:
+        raise ValueError("cria_copia_posicao: argumentos invalidos")
+    return cria_posicao(obter_pos_x(pPosicao), obter_pos_y(pPosicao))
 
 # Seletores
 
