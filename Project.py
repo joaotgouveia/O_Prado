@@ -474,13 +474,14 @@ def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
     sY = ""
 
     for i in range(1, len(sLinha)):
-        if sLinha[i].isdigit():
+        if sLinha[i].isnumeric():
             sX += sLinha[i]
         else:
+            iIndiceInicial = i
             break
     
-    for i in range(i + 3, len(sLinha)):
-        if sLinha[i].isdigit():
+    for i in range(iIndiceInicial + 2, len(sLinha)):
+        if sLinha[i].isnumeric():
             sY += sLinha[i]
         else:
             break
@@ -489,23 +490,27 @@ def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
 
     sLinha = fConfig.readline()
     tPosObstaculos = ()
-    for t in range(2, len(sLinha), 5):
+    for i in range(1, len(sLinha)):
         sX = ""
         sY = ""
-
-        for i in range(1, len(sLinha)):
-            if sLinha[i].isdigit():
-                sX += sLinha[i]
-            else:
-                break
+        #Implementar detetar parentesis aberto que inicia tuplo e parentesis fechado que termina tuplo
+        if sLinha[i] == "(":
+            for j in range(i + 1, len(sLinha)):
+                if sLinha[j].isnumeric():
+                    sX += sLinha[j]
+                else:
+                    iIndiceInicial = j
+                    break
     
-        for i in range(i + 3, len(sLinha)):
-            if sLinha[i].isdigit():
-                sY += sLinha[i]
-            else:
-                break
+            for j in range(iIndiceInicial + 2, len(sLinha)):
+                if sLinha[j].isnumeric():
+                    sY += sLinha[j]
+                else:
+                    break
         
-        tPosObstaculos += ((int(sX), int(sY)), )
+            tPosObstaculos += (cria_posicao(int(sX), int(sY)), )
+    return tPosObstaculos, pCanto
 
+print(simula_ecossistema("config.txt", 1, 2))
 
 
