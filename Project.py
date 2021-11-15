@@ -473,66 +473,93 @@ def geracao(prPrado):
 
 def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
     fConfig = open(sFicheiro, 'r')
-    sLinha = fConfig.readline()
+    fLines = fConfig.readlines()
     sX = ""
     sY = ""
 
-    for i in range(1, len(sLinha)):
-        if sLinha[i].isnumeric():
-            sX += sLinha[i]
+    for i in range(1, len(fLines[0])):
+        if fLines[0][i].isnumeric():
+            sX += fLines[0][i]
         else:
-            iIndiceInicial = i
+            iIndiceInicial = i + 2
             break
     
-    for i in range(iIndiceInicial + 2, len(sLinha)):
-        if sLinha[i].isnumeric():
-            sY += sLinha[i]
+    for i in range(iIndiceInicial, len(fLines[0])):
+        if fLines[0][i].isnumeric():
+            sY += fLines[0][i]
         else:
             break
     
     pCanto = cria_posicao(int(sX), int(sY))
 
-    sLinha = fConfig.readline()
     tPosObstaculos = ()
-    for i in range(1, len(sLinha)):
+    for i in range(1, len(fLines[1])):
         sX = ""
         sY = ""
-        if sLinha[i] == "(":
-            for j in range(i + 1, len(sLinha)):
-                if sLinha[j].isnumeric():
-                    sX += sLinha[j]
+        if fLines[1][i] == "(":
+            for j in range(i + 1, len(fLines[1])):
+                if fLines[1][j].isnumeric():
+                    sX += fLines[1][j]
                 else:
                     iIndiceInicial = j
                     break
     
-            for j in range(iIndiceInicial + 2, len(sLinha)):
-                if sLinha[j].isnumeric():
-                    sY += sLinha[j]
+            for j in range(iIndiceInicial + 2, len(fLines[1])):
+                if fLines[1][j].isnumeric():
+                    sY += fLines[1][j]
                 else:
                     break
         
             tPosObstaculos += (cria_posicao(int(sX), int(sY)), )
     
     tAnimais = ()
-    for line in fConfig:
+    tPosAnimais = ()
+    for i in range(2, len(fLines)):
         sEspecie = ""
         sFreqReproducao = ""
         sFreqAlimentacao = ""
-        if sLinha[i] == "(":
-            for j in range(i + 1, len(sLinha)):
-                if sLinha[j].isnumeric():
-                    sX += sLinha[j]
-                else:
-                    iIndiceInicial = j
-                    break
+        sX = ""
+        sY = ""
+        for j in range(2, len(fLines[i])):
+            if fLines[i][j].isalpha():
+                sEspecie += fLines[i][j]
+            else:
+                iIndiceInicial = j + 3
+                break
     
-            for j in range(iIndiceInicial + 2, len(sLinha)):
-                if sLinha[j].isnumeric():
-                    sY += sLinha[j]
-                else:
-                    break
+        for j in range(iIndiceInicial, len(fLines[i])):
+            if fLines[i][j].isnumeric():
+                sFreqReproducao += fLines[i][j]
+            else:
+                iIndiceInicial = j + 2
+                break
         
-            tAnimais += (cria_animal(),)
+        for j in range(iIndiceInicial, len(fLines[i])):
+            if fLines[i][j].isnumeric():
+                sFreqAlimentacao += fLines[i][j]
+            else:
+                iIndiceInicial = j + 3
+                break
+        
+        for j in range(iIndiceInicial, len(fLines[i])):
+            if fLines[i][j].isnumeric():
+                sX += fLines[i][j]
+            else:
+                iIndiceInicial = j + 2
+                break
+        
+        for j in range(iIndiceInicial, len(fLines[i])):
+            if fLines[i][j].isnumeric():
+                sY += fLines[i][j]
+            else:
+                break
+        
+        tAnimais += (cria_animal(sEspecie, int(sFreqReproducao), int(sFreqAlimentacao)),)
+        tPosAnimais += (cria_posicao(int(sX), int(sY)),)
+    
+    return pCanto, tPosObstaculos, tAnimais, tPosAnimais
+
+print(simula_ecossistema("config.txt", 1, True))
 
 
 
