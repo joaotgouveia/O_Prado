@@ -426,7 +426,7 @@ def prado_para_str(prPrado):
 # Funções de alto nível associadas ao TAD prado
 
 def obter_valor_numerico(prPrado, pPosicao):
-    return obter_tamanho_x(prPrado)*(obter_pos_y(pPosicao)) + obter_pos_x(pPosicao)
+    return obter_tamanho_x(prPrado)*obter_pos_y(pPosicao) + obter_pos_x(pPosicao)
 
 def eh_posicao_presa(prPrado, pPosicao):
     if eh_posicao_animal(prPrado, pPosicao):
@@ -434,7 +434,8 @@ def eh_posicao_presa(prPrado, pPosicao):
             return True
     return False
 
-def ordenar_movimentos(lPosicoes):
+def ordenar_movimentos(tPosicoes):
+    lPosicoes = list(tPosicoes)
     bMudou = True
     # Bubble sort aplicado ao contexto em questão
     while bMudou:
@@ -455,21 +456,22 @@ def ordenar_movimentos(lPosicoes):
 
 def pos_possiveis(prPrado, pPosicao, aAnimal):
     if eh_predador(aAnimal):
-        lPosPossiveis = [pos for pos in obter_posicoes_adjacentes(pPosicao)\
+        lPosPossiveis = [pos for pos in ordenar_movimentos(obter_posicoes_adjacentes(pPosicao))\
             if eh_posicao_presa(prPrado, pos)]
         if lPosPossiveis == []:
-            lPosPossiveis = [pos for pos in obter_posicoes_adjacentes(pPosicao)\
-            if eh_posicao_livre(prPrado, pos)]
+            lPosPossiveis = [pos for pos in ordenar_movimentos(obter_posicoes_adjacentes(pPosicao))\
+                if eh_posicao_livre(prPrado, pos)]
     else:
-        lPosPossiveis = [pos for pos in obter_posicoes_adjacentes(pPosicao)\
+        lPosPossiveis = [pos for pos in ordenar_movimentos(obter_posicoes_adjacentes(pPosicao))\
             if eh_posicao_livre(prPrado, pos)]
+    
     if lPosPossiveis != []:
         return lPosPossiveis
     return [pPosicao]
 
 def obter_movimento(prPrado, pPosicao):
     aAnimal = obter_animal(prPrado,pPosicao)
-    lPosPossiveis = ordenar_movimentos(pos_possiveis(prPrado, pPosicao, aAnimal))
+    lPosPossiveis = pos_possiveis(prPrado, pPosicao, aAnimal)
     iValorPos = obter_valor_numerico(prPrado, pPosicao)
     return lPosPossiveis[iValorPos%(len(lPosPossiveis))]
 
