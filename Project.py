@@ -287,18 +287,26 @@ def obter_animal(prPrado, pPosicao):
 
 # Modificadores
 
+def index(lPos, pPos):
+    for i in range(len(lPos)):
+        if posicoes_iguais(lPos[i], pPos):
+            break
+    return i
+
 def eliminar_animal(prPrado, pPosicao):
     lAnimais = list(prPrado["Animais"])
     lPosAnimais = list(prPrado["PosAnimais"])
-    del lAnimais[lPosAnimais.index(pPosicao)]
-    del lPosAnimais[lPosAnimais.index(pPosicao)]
+    i = index(lPosAnimais, pPosicao)
+    del lAnimais[i]
+    del lPosAnimais[i]
     prPrado["Animais"] = tuple(lAnimais)
     prPrado["PosAnimais"] = tuple(lPosAnimais)
     return prPrado
 
 def mover_animal(prPrado, pPosAnimal, pPosNova):
     lPosAnimais = list(prPrado["PosAnimais"])
-    lPosAnimais[lPosAnimais.index(pPosAnimal)] = pPosNova
+    i = index(lPosAnimais, pPosAnimal)
+    lPosAnimais[i] = pPosNova
     prPrado["PosAnimais"] = tuple(lPosAnimais)
     return prPrado
 
