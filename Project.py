@@ -1,7 +1,4 @@
 # criar funcao auxiliar para ver se pos esta dentro do prado efetivo, x > 0 e y > 0 (funcao cria_prado, pos_possiveis e eh_prado)
-#criar funcao auxiliar para atualizar os bichos do prado (funcao geracao)
-#criar funcao auxiliar para sacar as configs do ficheiro (funcao simula_ecossistema)
-#criar funcao auxiliar para criar os outputs (funcao simula_ecossistema)
 
 # 2.1.1 TAD posicao
 
@@ -477,6 +474,33 @@ def obter_movimento(prPrado, pPosicao):
 
 # Funções adicionais
 
+def atualiza_animal(prPrado, pPos, aAnimal):
+    eliminar_animal(prPrado, pPos)
+    inserir_animal(prPrado, aAnimal, pPos)
+
+def cria_output(prPrado, iGen):
+    sOutput = "Predadores: " + str(obter_numero_predadores(prPrado)) + " vs Presas: " + str(obter_numero_presas(prPrado)) + " (Gen. " + str(iGen) + ")\n"
+    sOutput += prado_para_str(prPrado)
+    return sOutput
+
+def le_ficheiro(sLine, iInicial, bAlpha):
+    sInf = ""
+    if bAlpha:
+        for j in range(iInicial, len(sLine)):
+            if sLine[j].isalpha():
+                sInf += sLine[j]
+            else:
+                iIndice = j
+                break
+    else:
+        for j in range(iInicial, len(sLine)):
+            if sLine[j].isnumeric():
+                sInf += sLine[j]
+            else:
+                iIndice = j
+                break
+    return sInf, iIndice
+
 def geracao(prPrado):
     tPosAnimais = obter_posicao_animais(prPrado)
     lPosEliminadas = []
@@ -484,142 +508,81 @@ def geracao(prPrado):
         if not pos in lPosEliminadas:
             aAnimal = obter_animal(prPrado, pos)
             pMovimento = obter_movimento(prPrado, pos)
-            aAnimal = aumenta_fome(aAnimal)
-            aAnimal = aumenta_idade(aAnimal)
-            prPrado = eliminar_animal(prPrado, pos)
-            prPrado = inserir_animal(prPrado, aAnimal, pos)
+            aumenta_fome(aAnimal)
+            aumenta_idade(aAnimal)
+            atualiza_animal(prPrado, pos, aAnimal)
             if eh_predador(aAnimal):
                 if not posicoes_iguais(pos, pMovimento):
                     if eh_posicao_presa(prPrado, pMovimento):
-                        prPrado = eliminar_animal(prPrado, pMovimento)
-                        aAnimal = reset_fome(aAnimal)
-                        prPrado = eliminar_animal(prPrado, pos)
-                        prPrado = inserir_animal(prPrado, aAnimal, pos)
+                        eliminar_animal(prPrado, pMovimento)
+                        reset_fome(aAnimal)
+                        atualiza_animal(prPrado, pos, aAnimal)
                         lPosEliminadas.append(pMovimento)
                     prPrado  = mover_animal(prPrado, pos, pMovimento)
                     if eh_animal_fertil(aAnimal):
                         aCria = reproduz_animal(aAnimal)
-                        prPrado = eliminar_animal(prPrado, pMovimento)
-                        prPrado = inserir_animal(prPrado, aAnimal, pMovimento)
-                        prPrado = inserir_animal(prPrado, aCria, pos)
+                        atualiza_animal(prPrado, pMovimento, aAnimal)
+                        inserir_animal(prPrado, aCria, pos)
                     if eh_animal_faminto(aAnimal):
-                        prPrado = eliminar_animal(prPrado, pMovimento)
+                        eliminar_animal(prPrado, pMovimento)
                 else:
                     if eh_animal_faminto(aAnimal):
-                        prPrado = eliminar_animal(prPrado, pos)
+                        eliminar_animal(prPrado, pos)
             else:
                 if not posicoes_iguais(pos, pMovimento):
-                    prPrado = mover_animal(prPrado, pos, pMovimento)
+                    mover_animal(prPrado, pos, pMovimento)
                     if eh_animal_fertil(aAnimal):
                         aCria = reproduz_animal(aAnimal)
-                        prPrado = eliminar_animal(prPrado, pMovimento)
-                        prPrado = inserir_animal(prPrado, aAnimal, pMovimento)
-                        prPrado = inserir_animal(prPrado, aCria, pos) 
+                        atualiza_animal(prPrado, pMovimento, aAnimal)
+                        inserir_animal(prPrado, aCria, pos) 
 
     return prPrado
 
 def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
     fConfig = open(sFicheiro, 'r')
-    fLines = fConfig.readlines()
-    sOutput = ""
-    sX = ""
-    sY = ""
-    for i in range(1, len(fLines[0])):
-        if fLines[0][i].isnumeric():
-            sX += fLines[0][i]
-        else:
-            iIndiceInicial = i + 2
-            break
-    
-    for i in range(iIndiceInicial, len(fLines[0])):
-        if fLines[0][i].isnumeric():
-            sY += fLines[0][i]
-        else:
-            break
-    
+    lLines = fConfig.readlines()
+
+    sX = le_ficheiro(lLines[0], 1, False)[0]
+    iIndiceInicial =  le_ficheiro(lLines[0], 1, False)[1]
+    sY = le_ficheiro(lLines[0], iIndiceInicial + 2, False)[0]
     pCanto = cria_posicao(int(sX), int(sY))
 
     tPosObstaculos = ()
-    for i in range(1, len(fLines[1])):
+    for i in range(1, len(lLines[1])):
         sX = ""
         sY = ""
-        if fLines[1][i] == "(":
-            for j in range(i + 1, len(fLines[1])):
-                if fLines[1][j].isnumeric():
-                    sX += fLines[1][j]
-                else:
-                    iIndiceInicial = j
-                    break
-    
-            for j in range(iIndiceInicial + 2, len(fLines[1])):
-                if fLines[1][j].isnumeric():
-                    sY += fLines[1][j]
-                else:
-                    break
-        
+        if lLines[1][i] == "(":
+            sX = le_ficheiro(lLines[1], i + 1, False)[0]
+            iIndiceInicial = le_ficheiro(lLines[1], i + 1, False)[1]
+            sY = le_ficheiro(lLines[1], iIndiceInicial + 2, False)[0]
             tPosObstaculos += (cria_posicao(int(sX), int(sY)), )
     
     tAnimais = ()
     tPosAnimais = ()
-    for i in range(2, len(fLines)):
-        sEspecie = ""
-        sFreqReproducao = ""
-        sFreqAlimentacao = ""
-        sX = ""
-        sY = ""
-        for j in range(2, len(fLines[i])):
-            if fLines[i][j].isalpha():
-                sEspecie += fLines[i][j]
-            else:
-                iIndiceInicial = j + 3
-                break
-    
-        for j in range(iIndiceInicial, len(fLines[i])):
-            if fLines[i][j].isnumeric():
-                sFreqReproducao += fLines[i][j]
-            else:
-                iIndiceInicial = j + 2
-                break
-        
-        for j in range(iIndiceInicial, len(fLines[i])):
-            if fLines[i][j].isnumeric():
-                sFreqAlimentacao += fLines[i][j]
-            else:
-                iIndiceInicial = j + 3
-                break
-        
-        for j in range(iIndiceInicial, len(fLines[i])):
-            if fLines[i][j].isnumeric():
-                sX += fLines[i][j]
-            else:
-                iIndiceInicial = j + 2
-                break
-        
-        for j in range(iIndiceInicial, len(fLines[i])):
-            if fLines[i][j].isnumeric():
-                sY += fLines[i][j]
-            else:
-                break
-        
+    for i in range(2, len(lLines)):
+        sEspecie = le_ficheiro(lLines[i], 2, True)[0]
+        iIndiceInicial = le_ficheiro(lLines[i], 2, True)[1]
+        sFreqReproducao = le_ficheiro(lLines[i], iIndiceInicial + 3, False)[0]
+        iIndiceInicial = le_ficheiro(lLines[i], iIndiceInicial + 3, False)[1]
+        sFreqAlimentacao = le_ficheiro(lLines[i], iIndiceInicial + 2, False)[0]
+        iIndiceInicial = le_ficheiro(lLines[i], iIndiceInicial + 2, False)[1]
+        sX = le_ficheiro(lLines[i], iIndiceInicial + 3, False)[0]
+        iIndiceInicial= le_ficheiro(lLines[i], iIndiceInicial + 3, False)[1]
+        sY = le_ficheiro(lLines[i], iIndiceInicial + 2, False)[0]
         tAnimais += (cria_animal(sEspecie, int(sFreqReproducao), int(sFreqAlimentacao)),)
         tPosAnimais += (cria_posicao(int(sX), int(sY)),)
     prPrado = cria_prado(pCanto, tPosObstaculos, tAnimais, tPosAnimais)
-    sOutput = "Predadores: " + str(obter_numero_predadores(prPrado)) + " vs Presas: " + str(obter_numero_presas(prPrado)) + " (Gen. 0)\n"
-    sOutput += prado_para_str(prPrado)
-    print(sOutput)
 
+    print(cria_output(prPrado, 0))
     for i in range(iNumGeracoes):
         prPradoPassado = cria_copia_prado(prPrado)
         prPrado = geracao(prPrado)
         if bVerboso and (obter_numero_predadores(prPrado) != obter_numero_predadores(prPradoPassado) or obter_numero_presas(prPrado) != obter_numero_presas(prPradoPassado)):
-            sOutput = "Predadores: " + str(obter_numero_predadores(prPrado)) + " vs Presas: " + str(obter_numero_presas(prPrado)) + " (Gen. " + str(i + 1) + ")\n"
-            sOutput += prado_para_str(prPrado)
-            print(sOutput)
+            print(cria_output(prPrado, i + 1))
     
     if not bVerboso:
-        sOutput = "Predadores: " + str(obter_numero_predadores(prPrado)) + " vs Presas: " + str(obter_numero_presas(prPrado)) + " (Gen. " + str(iNumGeracoes) + ")\n"
-        sOutput += prado_para_str(prPrado)
-        print(sOutput)
-    
+        print(cria_output(prPrado, iNumGeracoes))
+
     return (obter_numero_predadores(prPrado), obter_numero_presas(prPrado))
 
+simula_ecossistema("config.txt", 200, True)
