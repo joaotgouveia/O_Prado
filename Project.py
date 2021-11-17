@@ -290,8 +290,8 @@ def obter_animal(prPrado, pPosicao):
 def index(lPos, pPos):
     for i in range(len(lPos)):
         if posicoes_iguais(lPos[i], pPos):
-            break
-    return i
+            return i
+    return False
 
 def eliminar_animal(prPrado, pPosicao):
     lAnimais = list(prPrado["Animais"])
@@ -513,7 +513,7 @@ def geracao(prPrado):
     tPosAnimais = obter_posicao_animais(prPrado)
     lPosEliminadas = []
     for pos in tPosAnimais:
-        if not pos in lPosEliminadas:
+        if type(index(lPosEliminadas, pos)) == bool:
             aAnimal = obter_animal(prPrado, pos)
             pMovimento = obter_movimento(prPrado, pos)
             aumenta_fome(aAnimal)
