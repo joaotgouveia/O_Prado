@@ -584,5 +584,3 @@ def simula_ecossistema(sFicheiro, iNumGeracoes, bVerboso):
         print(cria_output(prPrado, iNumGeracoes))
 
     return (obter_numero_predadores(prPrado), obter_numero_presas(prPrado))
-
-simula_ecossistema("config.txt", 200, True)
