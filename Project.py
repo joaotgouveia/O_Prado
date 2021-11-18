@@ -1,5 +1,3 @@
-# criar funcao auxiliar para ver se pos esta dentro do prado efetivo, x > 0 e y > 0 (funcao cria_prado, pos_possiveis e eh_prado)
-
 # 2.1.1 TAD posicao
 
 # Construtores
@@ -225,6 +223,13 @@ def reproduz_animal(aAnimal):
 
 # Construtores
 
+def prado_efetivo(pPosCanto, pPos):
+    if obter_pos_x(pPos) >= obter_pos_x(pPosCanto) or obter_pos_y(pPos) >= obter_pos_y(pPosCanto):
+        return False
+    if obter_pos_x(pPos) == 0 or obter_pos_y(pPos) == 0:
+        return False
+    return True
+
 def cria_prado(pPosicao, tPosObstaculos, tAnimais, tPosAnimais):
     if not eh_posicao(pPosicao):
         raise ValueError("cria_prado: argumentos invalidos")
@@ -245,9 +250,7 @@ def cria_prado(pPosicao, tPosObstaculos, tAnimais, tPosAnimais):
     for posicao in tPosAnimais:
         if not eh_posicao(posicao):
             raise ValueError("cria_prado: argumentos invalidos")
-        if obter_pos_x(posicao) >= obter_pos_x(pPosicao) or obter_pos_y(posicao) >= obter_pos_y(pPosicao):
-            raise ValueError("cria_prado: argumentos invalidos")
-        if obter_pos_x(posicao) == 0 or obter_pos_y(posicao) == 0:
+        if not prado_efetivo(pPosicao, posicao):
             raise ValueError("cria_prado: argumentos invalidos")
     
     return {"PosCanto": pPosicao, "PosObstaculos": tPosObstaculos, "Animais": tAnimais, "PosAnimais": tPosAnimais}
@@ -334,20 +337,16 @@ def eh_prado(uArg):
     for posicao in uArg["PosObstaculos"]:
         if not eh_posicao(posicao):
             return False
-        if obter_pos_x(posicao) >= obter_pos_x(uArg["PosCanto"]) or obter_pos_y(posicao) >= obter_pos_y(uArg["PosCanto"]):
+        if not prado_efetivo(uArg["PosCanto"], posicao):
             return False
-        if obter_pos_x(posicao) == 0 or obter_pos_y(posicao) == 0:
-           return False
     for animal in uArg["Animais"]:
         if not eh_animal(animal):
             return False
     for posicao in uArg["PosAnimais"]:
         if not eh_posicao(posicao):
             return False
-        if obter_pos_x(posicao) >= obter_pos_x(uArg["PosCanto"]) or obter_pos_y(posicao) >= obter_pos_y(uArg["PosCanto"]):
+        if not prado_efetivo(uArg["PosCanto"], posicao):
             return False
-        if obter_pos_x(posicao) == 0 or obter_pos_y(posicao) == 0:
-           return False
 
     for posicao in uArg["PosObstaculos"]:
         for pos in uArg["PosAnimais"]:
@@ -362,10 +361,8 @@ def eh_posicao_animal(prPrado, pPosicao):
     return False
 
 def eh_posicao_obstaculo(prPrado, pPosicao):
-    if obter_pos_x(pPosicao) == 0 or obter_pos_y(pPosicao) == 0:
-        return True
-    if obter_pos_x(pPosicao) == obter_tamanho_x(prPrado) - 1 or obter_pos_y(pPosicao) == obter_tamanho_y(prPrado) - 1:
-        return True
+    if not prado_efetivo(cria_posicao(obter_tamanho_x(prPrado) - 1, obter_tamanho_y(prPrado) - 1), pPosicao):
+            return True
     for posicao in prPrado["PosObstaculos"]:
         if posicoes_iguais(posicao, pPosicao):
             return True
