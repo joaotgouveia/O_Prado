@@ -216,7 +216,7 @@ def reset_fome(animal):
 # Reconhecedores
 
 def eh_animal(arg):
-    """eh_animal: universal → booleano
+    """ eh_animal: universal → booleano
     Esta função avalia se o argumento que recebe
     se trata de um TAD animal.
     """
@@ -313,11 +313,21 @@ def animal_para_str(animal):
 # Funções de alto nível associadas ao TAD animal
 
 def eh_animal_fertil(animal):
+    """ eh_animal_fertil: animal → booleano
+    Esta função avalia se o animal passado como argumento
+    já atingiu a idade de reprodução.
+    """
     if obter_freq_reproducao(animal) <= obter_idade(animal):
         return True
     return False
 
 def eh_animal_faminto(animal):
+    """ eh_animal_faminto: animal → booleano
+    Esta função avalia se o animal passado como argumento
+    já atingiu fome igual à sua frequência de alimentação,
+    devolve automaticamente falso caso o animal se trate
+    de uma presa.
+    """
     if eh_presa(animal):
         return False
     if obter_freq_alimentacao(animal) == obter_fome(animal):
@@ -325,21 +335,58 @@ def eh_animal_faminto(animal):
     return False
 
 def reproduz_animal(animal):
+    """ reproduz_animal: animal → animal
+    Esta função devolve um animal da mesma 
+    espécie do animal passado como argumento
+    com idade e fome iguais a 0, altera
+    destrutivamente para 0 a idade do animal
+    passado como argumento.
+    """
     reset_idade(animal)
     return cria_animal(obter_especie(animal), obter_freq_reproducao(animal), obter_freq_alimentacao(animal))
 
 # TAD prado
 
-# Construtores
+    # Função auxiliar index, ajuda a reduzir a repetição de código e a respeitar a abstração de dados nas funções eliminar_animal, mover_animal e geracao.
+
+def index(posicoes, pos):
+    """ index: lista posicoes × posicao → int ou booleano
+    Esta função recebe uma lista e uma posição e devolve
+    o indíce dessa posição na lista, devolvendo False caso
+    a posição não esteja na lista. Serve como uma alternativa
+    que respeita a abstração de dados para as funções "index"
+    e "in" do python.
+    """
+    for i in range(len(posicoes)):
+        if posicoes_iguais(posicoes[i], pos):
+            return i
+    return False
+
+
+    # Função auxiliar prado_efetivo, ajuda a reduzir a repetição de código nas funções cria_prado, eh_prado e eh_posicao_obstaculo.
 
 def prado_efetivo(pos_canto, pos):
+    """ prado_efetivo: posicao × posicao → booleano
+    Esta função recebe a posição de um canto do prado e uma posição
+    e avalia se a posição se encontra dentro dos limites do prado,
+    excluindo a zona das montanhas que rodeiam o prado.
+    """
     if obter_pos_x(pos) >= obter_pos_x(pos_canto) or obter_pos_y(pos) >= obter_pos_y(pos_canto):
         return False
     if obter_pos_x(pos) == 0 or obter_pos_y(pos) == 0:
         return False
     return True
 
+# Construtores
+
 def cria_prado(pos, pos_obstaculos, animais, pos_animais):
+    """ cria_prado: posicao × tuplo × tuplo × tuplo → prado
+    Esta função recebe uma posição que corresponde ao canto
+    inferior direito do prado, um tuplo com a posição dos
+    rochedos do prado, e dois tuplos, um com os animais que habitam
+    o prado e outro com as respetivas posições e cria o prado
+    correspondente.
+    """
     if not eh_posicao(pos):
         raise ValueError("cria_prado: argumentos invalidos")
     if type(pos_obstaculos) != tuple or type(animais) != tuple or type(pos_animais) != tuple:
@@ -365,17 +412,34 @@ def cria_prado(pos, pos_obstaculos, animais, pos_animais):
     return {"PosCanto": pos, "PosObstaculos": pos_obstaculos, "Animais": animais, "PosAnimais": pos_animais}
 
 def cria_copia_prado(prado):
+    """cria_copia_prado: prado → prado
+    Esta função recebe um prado e cria uma
+    cópia do mesmo.
+    """
     return dict(prado)
 
 # Seletores
 
 def obter_tamanho_x(prado):
+    """ obter_tamanho_x: prado → int
+    Esta função recebe um prado e
+    devolve a sua largura.
+    """
     return obter_pos_x(prado["PosCanto"]) + 1 
 
 def obter_tamanho_y(prado):
+    """ obter_tamanho_y: prado → int
+    Esta função recebe um prado e
+    devolve a sua altura.
+    """
     return obter_pos_y(prado["PosCanto"]) + 1
 
 def obter_numero_predadores(prado):
+    """ obter_numero_predadores: prado → int
+    Esta função recebe um prado e
+    devolve a quantidade de predadores
+    que o habitam.
+    """
     num_predadores = 0
     for animal in prado["Animais"]:
         if eh_predador(animal):
@@ -383,6 +447,11 @@ def obter_numero_predadores(prado):
     return num_predadores
 
 def obter_numero_presas(prPrado):
+    """ obter_numero_presas: prado → int
+    Esta função recebe um prado e
+    devolve a quantidade de presas
+    que o habitam.
+    """
     num_presas = 0
     for animal in prPrado["Animais"]:
         if eh_presa(animal):
@@ -390,6 +459,12 @@ def obter_numero_presas(prPrado):
     return num_presas
 
 def obter_posicao_animais(prado):
+    """ obter_posicao_animais: prado → tuplo posicoes
+    Esta função recebe um prado e devolve um tuplo
+    com as posições dos animais que o habitam,
+    ordenadas de acordo com a ordem de leitura do
+    prado.
+    """
     return ordenar_posicoes(prado["PosAnimais"])
 
 def obter_animal(prado, pos):
@@ -399,13 +474,12 @@ def obter_animal(prado, pos):
 
 # Modificadores
 
-def index(posicoes, pos):
-    for i in range(len(posicoes)):
-        if posicoes_iguais(posicoes[i], pos):
-            return i
-    return False
-
 def eliminar_animal(prado, pos):
+    """ eliminar_animal: prado × posicao → prado
+    Esta função recebe um prado e uma posição e
+    altera destrutivamente o prado, eliminando
+    o animal na posição passada como argumento. 
+    """
     animais = list(prado["Animais"])
     pos_animais = list(prado["PosAnimais"])
     i = index(pos_animais, pos)
@@ -416,6 +490,12 @@ def eliminar_animal(prado, pos):
     return prado
 
 def mover_animal(prado, pos_animal, pos_nova):
+    """ mover_animal: prado × posicao × posicao → prado
+    Esta função recebe um prado e duas posição e
+    altera destrutivamente o prado, movimentando
+    o animal na preimeira posição passada como argumento
+    para a segunda posição.
+    """
     pos_animais = list(prado["PosAnimais"])
     i = index(pos_animais, pos_animal)
     pos_animais[i] = pos_nova
@@ -423,6 +503,11 @@ def mover_animal(prado, pos_animal, pos_nova):
     return prado
 
 def inserir_animal(prado, animal, pos):
+    """ mover_animal: prado × animal × posicao → prado
+    Esta função recebe um prado, um animal e uma posição
+    e altera destrutivamente o prado, acrescentado o animal
+    passado como argumento na posição passada como argumento.
+    """
     prado["Animais"] += (cria_copia_animal(animal), )
     prado["PosAnimais"] += (cria_copia_posicao(pos), )
     return prado
@@ -430,6 +515,10 @@ def inserir_animal(prado, animal, pos):
 # Reconhecedores
 
 def eh_prado(arg):
+    """ eh_prado: universal → booleano
+    Esta função avalia se o argumento que recebe
+    se trata de um TAD prado.
+    """
     if type(arg) != dict:
         return False
     if len(arg) != 4:
@@ -464,12 +553,22 @@ def eh_prado(arg):
     return True
 
 def eh_posicao_animal(prado, pos):
+    """ eh_posicao_animal: prado × posicao → booleano
+    Esta função avalia se a posição que recebe
+    se trata da posição de um animal no prado
+    passado como argumento.
+    """
     for posicao in obter_posicao_animais(prado):
         if posicoes_iguais(posicao, pos):
             return True
     return False
 
 def eh_posicao_obstaculo(prado, pos):
+    """ eh_posicao_obstaculo: prado × posicao → booleano
+    Esta função avalia se a posição que recebe
+    se trata da posição de um obstaculo no prado
+    passado como argumento.
+    """
     if not prado_efetivo(cria_posicao(obter_tamanho_x(prado) - 1, obter_tamanho_y(prado) - 1), pos):
             return True
     for posicao in prado["PosObstaculos"]:
@@ -478,6 +577,12 @@ def eh_posicao_obstaculo(prado, pos):
     return False
 
 def eh_posicao_livre(prado, pos):
+    """ eh_posicao_livre: prado × posicao → booleano
+    Esta função avalia se a posição que recebe
+    se trata da posição de uma posição livre no prado
+    passado como argumento, ou seja, se se encontra sem animais
+    nem obstáculos.
+    """
     if eh_posicao_animal(prado, pos) or eh_posicao_obstaculo(prado, pos):
         return False
     return True
@@ -485,7 +590,9 @@ def eh_posicao_livre(prado, pos):
 # Teste
 
 def prados_iguais(prado1, prado2):
-    
+    """ prados_iguais: prado × prado → booleano
+    Esta função avalia se dois prados são iguais.
+    """
     if len(obter_posicao_animais(prado1)) != len(obter_posicao_animais(prado2)):
         return False
     for i in range(len(obter_posicao_animais(prado1))):
@@ -509,13 +616,22 @@ def prados_iguais(prado1, prado2):
 # Transformador
 
 def prado_para_str(prado):
+    """ prado_para_str : prado → str
+    Esta função devolve uma cadeia de caracteres que
+    representa o prado que recebeu como argumento, os
+    animais são representados pela sua representação em char,
+    os obstáculos por "@" e as posições livres por ".".
+    """
+    # Criação de uma matriz com linhas vazias com o tamanho do prado,
+    # exceto os contornos superiores e inferiores.
     matriz_prado = [[] for y in range(obter_tamanho_y(prado))]
-    str_prado = ""
     matriz_prado[0] = ["-" for x in range(obter_tamanho_x(prado))]
     matriz_prado[0][0] = "+"
     matriz_prado[0][-1] = "+"
     matriz_prado[-1] = matriz_prado[0]
+    str_prado = ""
 
+    # Preenchimento das linhas da matriz com os animais, obstáculos e posições vazias.
     for y in range(1, len(matriz_prado) - 1):
         matriz_prado[y].append("|")
         for x in range(1,obter_tamanho_x(prado) - 1):
@@ -527,6 +643,7 @@ def prado_para_str(prado):
                 matriz_prado[y].append(animal_para_char(obter_animal(prado, cria_posicao(x,y))))
         matriz_prado[y].append("|")
     
+    # Transformação da matriz numa string correspondente
     for y in range(len(matriz_prado)):
         for char in matriz_prado[y]:
             str_prado += str(char)
@@ -536,16 +653,33 @@ def prado_para_str(prado):
 
 # Funções de alto nível associadas ao TAD prado
 
-def obter_valor_numerico(prado, pos):
-    return obter_tamanho_x(prado)*obter_pos_y(pos) + obter_pos_x(pos)
+    # Função auxiliar eh_posicao_presa, ajuda a reduzir a repetição de código nas funções pos_possiveis e geracao.
 
 def eh_posicao_presa(prado, pos):
+    """ eh_posicao_presa: prado × posicao → booleano
+    Esta função avalia se a posição que recebe
+    se trata da posição de uma presa.
+    """
     if eh_posicao_animal(prado, pos):
         if eh_presa(obter_animal(prado, pos)):
             return True
     return False
 
+def obter_valor_numerico(prado, pos):
+    """ obter_valor_numerico: prado × posicao → int
+    Esta função recebe um prado e uma posição e cálcula
+    o valor numérico associado a essa posição, de acordo
+    com a ordem de leitura do prado.
+    """
+    return obter_tamanho_x(prado)*obter_pos_y(pos) + obter_pos_x(pos)
+
+    # Função auxiliar ordenar_movimentos, ajuda a organizar o código na função pos_possiveis.
+
 def ordenar_movimentos(posicoes):
+    """ ordenar_movimentos: lista posicoes → lista posicoes
+    Esta função recebe uma lista de posições que correspondem
+    a possíveis movimentos e ordena-as em sentido horário.
+    """
     lista_posicoes = list(posicoes)
     mudou = True
     # Bubble sort aplicado ao contexto em questão
@@ -565,7 +699,13 @@ def ordenar_movimentos(posicoes):
                 mudou = True
     return lista_posicoes
 
+    # Função auxiliar pos_possiveis, ajuda a organizar o código na função obter_movimento.
+
 def pos_possiveis(prado, pos, animal):
+    """ pos_possiveis: prado × posicao × animal → lista posicoes
+    Esta função recebe um prado, uma posição e um animal e retorna
+    a lista dos seus movimentos possíveis, ordenados em sentido horário.
+    """
     if eh_predador(animal):
         posicoes_possiveis = [pos for pos in ordenar_movimentos(obter_posicoes_adjacentes(pos))\
             if eh_posicao_presa(prado, pos)]
@@ -581,6 +721,12 @@ def pos_possiveis(prado, pos, animal):
     return [pos]
 
 def obter_movimento(prado, pos):
+    """ obter_movimento: prado × posicao → posicao
+    Esta função recebe um prado e uma posição e devolve a posição
+    seguinte do animal na posição passada como argumento dentro
+    do prado passado como argumento de acordo com as regras de
+    movimento dos animais no prado.
+    """
     animal = obter_animal(prado,pos)
     posicoes_possiveis = pos_possiveis(prado, pos, animal)
     valor_pos = obter_valor_numerico(prado, pos)
@@ -588,34 +734,33 @@ def obter_movimento(prado, pos):
 
 # Funções adicionais
 
+    # Função auxiliar atualiza_animal, ajuda a reduzir a repetição de código na função geracao.
+
 def atualiza_animal(prado, pos, animal):
+    """ atualiza_animal: prado × posicao × animal → posicao
+    Esta função recebe um prado, uma posição e o animal do
+    prado nessa posição e altera destrutivamente o prado,
+    atualizando o animal.
+    """
     eliminar_animal(prado, pos)
     inserir_animal(prado, animal, pos)
 
+    # Função auxiliar cria_output, ajuda a reduzir a repetição de código na função simula_ecossistema.
+
 def cria_output(prado, gen):
+    """ cria_output: prado × int → str
+    Esta função recebe um prado e a geração em que este prado
+    se encontra e cria o output que lhe corresponde.
+    """
     output = "Predadores: " + str(obter_numero_predadores(prado)) + " vs Presas: " + str(obter_numero_presas(prado)) + " (Gen. " + str(gen) + ")\n"
     output += prado_para_str(prado)
     return output
 
-def le_ficheiro(line, indice, alpha):
-    informacao = ""
-    if alpha:
-        for j in range(indice, len(line)):
-            if line[j].isalpha():
-                informacao += line[j]
-            else:
-                indice = j
-                break
-    else:
-        for j in range(indice, len(line)):
-            if line[j].isnumeric():
-                informacao += line[j]
-            else:
-                indice = j
-                break
-    return informacao, indice
-
 def geracao(prado):
+    """ geracao: prado → prado
+    Esta função modifica o prado passado como argumento de
+    acordo com a evolulção correspondente a uma geração completa.
+    """
     pos_animais = obter_posicao_animais(prado)
     pos_eliminadas = []
     for pos in pos_animais:
@@ -653,37 +798,38 @@ def geracao(prado):
     return prado
 
 def simula_ecossistema(ficheiro, geracoes, verboso):
-    
+    """ geracao: str × int × booleano → tuplo
+    Esta função simula o passar das gerações num prado, recebe
+    uma cadeia de caracteres que contém o nome de um ficheiro
+    com configurações para o prado, um número inteiro que
+    corresponde ao número de gerações a simular e um booleano,
+    que corresponde à ativação (ou não) do modo verboso.
+    """
     with open(ficheiro, 'r') as config:
         lines = config.readlines()
 
-    x = le_ficheiro(lines[0], 1, False)[0]
-    indice_inicial =  le_ficheiro(lines[0], 1, False)[1]
-    y = le_ficheiro(lines[0], indice_inicial + 2, False)[0]
-    pos_canto = cria_posicao(int(x), int(y))
+    x = eval(lines[0])[0]
+    y = eval(lines[0])[1]
+    pos_canto = cria_posicao(x, y)
 
+    obstaculos = eval(lines[1])
     pos_obstaculos = ()
-    for i in range(1, len(lines[1])):
-        if lines[1][i] == "(":
-            x = le_ficheiro(lines[1], i + 1, False)[0]
-            indice_inicial = le_ficheiro(lines[1], i + 1, False)[1]
-            y = le_ficheiro(lines[1], indice_inicial + 2, False)[0]
-            pos_obstaculos += (cria_posicao(int(x), int(y)), )
+    for t in obstaculos:
+        x = t[0]
+        y = t[1]
+        pos_obstaculos += (cria_posicao(x, y), )
     
     animais = ()
     pos_animais = ()
     for i in range(2, len(lines)):
-        especie = le_ficheiro(lines[i], 2, True)[0]
-        indice_inicial = le_ficheiro(lines[i], 2, True)[1]
-        freq_reproducao = le_ficheiro(lines[i], indice_inicial + 3, False)[0]
-        indice_inicial = le_ficheiro(lines[i], indice_inicial + 3, False)[1]
-        freq_alimentacao = le_ficheiro(lines[i], indice_inicial + 2, False)[0]
-        indice_inicial = le_ficheiro(lines[i], indice_inicial + 2, False)[1]
-        x = le_ficheiro(lines[i], indice_inicial + 3, False)[0]
-        indice_inicial= le_ficheiro(lines[i], indice_inicial + 3, False)[1]
-        y = le_ficheiro(lines[i], indice_inicial + 2, False)[0]
-        animais += (cria_animal(especie, int(freq_reproducao), int(freq_alimentacao)),)
-        pos_animais += (cria_posicao(int(x), int(y)),)
+        animal = eval(lines[i])
+        especie = animal[0]
+        freq_reproducao = animal[1]
+        freq_alimentacao = animal[2]
+        x = animal[3][0]
+        y = animal[3][1]
+        animais += (cria_animal(especie, freq_reproducao, freq_alimentacao),)
+        pos_animais += (cria_posicao(x, y),)
     prado = cria_prado(pos_canto, pos_obstaculos, animais, pos_animais)
 
     print(cria_output(prado, 0))
