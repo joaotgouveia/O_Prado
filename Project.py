@@ -2,204 +2,309 @@
 
 # Construtores
 
-def cria_posicao(iX, iY):
-    if type(iX) != int or type(iY) != int:
+def cria_posicao(x, y):
+    """ cria_posicao: int × int → posicao
+    Esta função recebe duas coordenadas
+    e cria a posição correspondente.
+    """
+    if type(x) != int or type(y) != int:
         raise ValueError("cria_posicao: argumentos invalidos")
-    if iX < 0 or iY < 0:
+    if x < 0 or y < 0:
         raise ValueError("cria_posicao: argumentos invalidos")
-    return (iX, iY)
+    return (x, y)
 
-def cria_copia_posicao(pPosicao):
-    if type(pPosicao) != tuple:
-        raise ValueError("cria_copia_posicao: argumento invalido")
-    if len(pPosicao) != 2:
-        raise ValueError("cria_copia_posicao: argumento invalido")
-    return cria_posicao(obter_pos_x(pPosicao), obter_pos_y(pPosicao))
+def cria_copia_posicao(pos):
+    """ cria_copia_posicao: posicao → posicao
+    Esta função recebe uma posição e cria uma
+    cópia da mesma.
+    """
+    return tuple(pos)
 
 # Seletores
 
-def obter_pos_x(pPosicao):
-    return pPosicao[0]
+def obter_pos_x(pos):
+    """ obter_pos_x : posicao → int
+    Esta função recebe uma posição e devolve
+    a sua abcissa.
+    """
+    return pos[0]
 
-def obter_pos_y(pPosicao):
-    return pPosicao[1]
+def obter_pos_y(pos):
+    """ obter_pos_y : posicao → int
+    Esta função recebe uma posição e devolve
+    a sua ordenada.
+    """
+    return pos[1]
 
 # Reconhecedor
 
-def eh_posicao(uArg):
-    if type(uArg) != tuple:
+def eh_posicao(arg):
+    """ eh_posicao: universal → booleano
+    Esta função avalia se o argumento que recebe
+    se trata de um TAD posição.
+    """
+    if type(arg) != tuple:
         return False
-    if len(uArg) != 2:
+    if len(arg) != 2:
         return False
-    if type(uArg[0]) != int or type(uArg[1]) != int:
+    if type(arg[0]) != int or type(arg[1]) != int:
         return False
-    if obter_pos_x(uArg) < 0 or obter_pos_y(uArg) < 0:
+    if obter_pos_x(arg) < 0 or obter_pos_y(arg) < 0:
         return False
     return True
 
 # Teste
 
-def posicoes_iguais(pPosicao1, pPosicao2):
-    if obter_pos_x(pPosicao1) != obter_pos_x(pPosicao2) or obter_pos_y(pPosicao1) != obter_pos_y(pPosicao2):
-        return False
-    return True
+def posicoes_iguais(pos1, pos2):
+    """ posicoes_iguais: posicao × posicao → booleano
+    Esta função avalia se duas posições são iguais.
+    """
+    return obter_pos_x(pos1) == obter_pos_x(pos2) and obter_pos_y(pos1) == obter_pos_y(pos2)
 
 # Transformador
 
-def posicao_para_str(pPosicao):
-    s = "(" + str(obter_pos_x(pPosicao)) + ", " + str(obter_pos_y(pPosicao)) + ")"
-    return s
+def posicao_para_str(pos):
+    """ posicao_para_str : posicao → str
+    Esta função devolve uma cadeia de caracteres na forma
+    '(x, y)' que representa a posição que recebeu como argumento.
+    """
+    return "(" + str(obter_pos_x(pos)) + ", " + str(obter_pos_y(pos)) + ")"
 
 # Funções de alto nível associadas ao TAD posicao
 
-def obter_posicoes_adjacentes(pPosicao):
-    tPosicoesAdjacentes = ()
-    if obter_pos_y(pPosicao) != 0:
-        tPosicoesAdjacentes += (cria_posicao(obter_pos_x(pPosicao), obter_pos_y(pPosicao) - 1), )
-    tPosicoesAdjacentes += (cria_posicao(obter_pos_x(pPosicao) + 1, obter_pos_y(pPosicao)), )
-    tPosicoesAdjacentes += (cria_posicao(obter_pos_x(pPosicao), obter_pos_y(pPosicao) + 1), )
-    if obter_pos_x(pPosicao) != 0:
-        tPosicoesAdjacentes += (cria_posicao(obter_pos_x(pPosicao) - 1, obter_pos_y(pPosicao)), )
+def obter_posicoes_adjacentes(pos):
+    """ obter_posicoes_adjacentes: posicao → tuplo
+    Esta função recebe uma posição e devolve as 4 (ou menos) posições que a rodeiam.
+    """
+    pos_adjacentes = ()
+
+    if obter_pos_y(pos) != 0:
+        pos_adjacentes += (cria_posicao(obter_pos_x(pos), obter_pos_y(pos) - 1), )
+    pos_adjacentes += (cria_posicao(obter_pos_x(pos) + 1, obter_pos_y(pos)), )
+    pos_adjacentes += (cria_posicao(obter_pos_x(pos), obter_pos_y(pos) + 1), )
+    if obter_pos_x(pos) != 0:
+        pos_adjacentes += (cria_posicao(obter_pos_x(pos) - 1, obter_pos_y(pos)), )
     
-    return tPosicoesAdjacentes
+    return pos_adjacentes
 
-def ordenar_posicoes(tPosicoes):
-    lPosicoes = list(tPosicoes)
-    bMudou = True
+def ordenar_posicoes(tuplo_posicoes):
+    """ordenar_posicoes: tuplo → tuplo
+    Esta função recebe um tuplo com um conjunto de posições
+    e ordena-as de acordo com a ordem de leitura do prado.
+    """
+    lista_posicoes = list(tuplo_posicoes)
     # Bubble sort aplicado ao contexto em questão
-    while bMudou:
-            bMudou = False
-            for i in range(len(lPosicoes)-1):
-                if obter_pos_y(lPosicoes[i]) > obter_pos_y(lPosicoes[i + 1]):
-                    lPosicoes[i], lPosicoes[i + 1] = lPosicoes[i + 1], lPosicoes[i]
-                    bMudou = True
+    mudou = True
+    while mudou:
+            mudou = False
+            for i in range(len(lista_posicoes)-1):
+                if obter_pos_y(lista_posicoes[i]) > obter_pos_y(lista_posicoes[i + 1]):
+                    lista_posicoes[i], lista_posicoes[i + 1] = lista_posicoes[i + 1], lista_posicoes[i]
+                    mudou = True
 
-    bMudou = True
     # Bubble sort aplicado ao contexto em questão
-    while bMudou:
-        bMudou = False
-        for i in range(len(lPosicoes)-1):
-            if obter_pos_y(lPosicoes[i]) == obter_pos_y(lPosicoes[i + 1]):
-                if obter_pos_x(lPosicoes[i]) > obter_pos_x(lPosicoes[i + 1]):
-                    lPosicoes[i], lPosicoes[i + 1] = lPosicoes[i + 1], lPosicoes[i]
-                    bMudou = True
+    mudou = True
+    while mudou:
+        mudou = False
+        for i in range(len(lista_posicoes)-1):
+            if obter_pos_y(lista_posicoes[i]) == obter_pos_y(lista_posicoes[i + 1]):
+                if obter_pos_x(lista_posicoes[i]) > obter_pos_x(lista_posicoes[i + 1]):
+                    lista_posicoes[i], lista_posicoes[i + 1] = lista_posicoes[i + 1], lista_posicoes[i]
+                    mudou = True
 
-    return tuple(lPosicoes)
+    return tuple(lista_posicoes)
 
 # 2.1.2 TAD animal
 
 # Construtores
 
-def cria_animal(sEspecie, iFreqReproducao, iFreqAlimentacao):
-    if type(sEspecie) != str or type(iFreqReproducao) != int or type(iFreqAlimentacao) != int:
+def cria_animal(especie, freq_reproducao, freq_alimentacao):
+    """cria animal: str × int × int → animal
+    Esta função recebe uma espécie, uma frequência de reprodução
+    e uma frequência de alimentação e cria o animal correspondente.
+    """
+    if type(especie) != str or type(freq_reproducao) != int or type(freq_alimentacao) != int:
         raise ValueError("cria_animal: argumentos invalidos")
-    if len(sEspecie) < 1 or iFreqReproducao <= 0 or iFreqAlimentacao < 0:
+    if len(especie) < 1 or freq_reproducao <= 0 or freq_alimentacao < 0:
         raise ValueError("cria_animal: argumentos invalidos")
-    for char in sEspecie:
+    for char in especie:
         if not char.isalpha():
             raise ValueError("cria_animal: argumentos invalidos")
-    return {"Especie": sEspecie, "FreqReproducao": iFreqReproducao, "FreqAlimentacao": iFreqAlimentacao, "Fome": 0, "Idade": 0}
+    return {"Especie": especie, "FreqReproducao": freq_reproducao,\
+    "FreqAlimentacao": freq_alimentacao, "Fome": 0, "Idade": 0}
 
-def cria_copia_animal(aAnimal):
-    return dict(aAnimal)
+def cria_copia_animal(animal):
+    """cria_copia_animal: animal → animal
+    Esta função recebe um animal e cria uma
+    cópia do mesmo.
+    """
+    return dict(animal)
 
 # Seletores
 
-def obter_especie(aAnimal):
-    return aAnimal["Especie"]
+def obter_especie(animal):
+    """ obter_especie: animal → str
+    Esta função recebe um animal e retorna a sua espécie.
+    """
+    return animal["Especie"]
 
-def obter_freq_reproducao(aAnimal):
-    return aAnimal["FreqReproducao"]
+def obter_freq_reproducao(animal):
+    """ obter_freq_reproducao: animal → int
+    Esta função recebe um animal e retorna a sua
+    frquência de reprodução.
+    """
+    return animal["FreqReproducao"]
 
-def obter_freq_alimentacao(aAnimal):
-    return aAnimal["FreqAlimentacao"]
+def obter_freq_alimentacao(animal):
+    """ obter_freq_alimentacao: animal → int
+    Esta função recebe um animal e retorna a sua
+    frquência de alimentação.
+    """
+    return animal["FreqAlimentacao"]
 
-def obter_idade(aAnimal):
-    return aAnimal["Idade"]
+def obter_idade(animal):
+    """ obter_idade: animal → int
+    Esta função recebe um animal e retorna a sua idade.
+    """
+    return animal["Idade"]
 
-def obter_fome(aAnimal):
-    return aAnimal["Fome"]
+def obter_fome(animal):
+    """ obter_fome: animal → int
+    Esta função recebe um animal e retorna a sua fome.
+    """
+    return animal["Fome"]
 
 # Modificadores
 
-def aumenta_idade(aAnimal):
-    aAnimal["Idade"] += 1
-    return aAnimal
+def aumenta_idade(animal):
+    """ aumenta_idade: animal → animal
+    Esta função aumenta destrutivamente a idade de um animal,
+    retornando-o.
+    """
+    animal["Idade"] += 1
+    return animal
 
-def reset_idade(aAnimal):
-    aAnimal["Idade"] = 0
-    return aAnimal
+def reset_idade(animal):
+    """ reset_idade: animal → animal
+    Esta função altera destrutivamente a idade de um animal para 0,
+    retornando-o.
+    """
+    animal["Idade"] = 0
+    return animal
 
-def aumenta_fome(aAnimal):
-    if aAnimal["FreqAlimentacao"] != 0:
-        aAnimal["Fome"] += 1
-    return aAnimal
+def aumenta_fome(animal):
+    """ aumenta_fome: animal → animal
+    Esta função aumenta destrutivamente a fome de um animal,
+    retornando-o.
+    """
+    if animal["FreqAlimentacao"] != 0:
+        animal["Fome"] += 1
+    return animal
 
-def reset_fome(aAnimal):
-    aAnimal["Fome"] = 0
-    return aAnimal
+def reset_fome(animal):
+    """ reset_fome: animal → animal
+    Esta função altera destrutivamente a fome de um animal para 0,
+    retornando-o.
+    """
+    animal["Fome"] = 0
+    return animal
 
 # Reconhecedores
 
-def eh_animal(uArg):
-    if type(uArg) != dict:
+def eh_animal(arg):
+    """eh_animal: universal → booleano
+    Esta função avalia se o argumento que recebe
+    se trata de um TAD animal.
+    """
+    if type(arg) != dict:
         return False
-    if len(uArg) != 5:
+    if len(arg) != 5:
         return False
-    if not "Especie" in uArg.keys() or not "FreqReproducao" in uArg.keys() or not "FreqAlimentacao" in uArg.keys() or not "Fome" in uArg.keys() or not "Idade"in uArg.keys():
+    if not "Especie" in arg.keys() or not "FreqReproducao" in arg.keys() or not\
+    "FreqAlimentacao" in arg.keys() or not "Fome" in arg.keys() or not "Idade"in arg.keys():
         return False
-    if type(obter_especie(uArg)) != str or type(obter_freq_reproducao(uArg)) != int or type(obter_freq_alimentacao(uArg)) != int or type(obter_fome(uArg)) != int or type(obter_idade(uArg)) != int:
+    if type(obter_especie(arg)) != str or type(obter_freq_reproducao(arg)) != int or\
+    type(obter_freq_alimentacao(arg)) != int or type(obter_fome(arg)) != int or type(obter_idade(arg)) != int:
         return False
-    if len(obter_especie(uArg)) == 0:
+    if len(obter_especie(arg)) == 0:
         return False
-    for char in obter_especie(uArg):
+    for char in obter_especie(arg):
         if not char.isalpha():
             return False
-    if obter_freq_reproducao(uArg) <= 0 or obter_freq_alimentacao(uArg) < 0 or obter_fome(uArg) < 0 or obter_idade(uArg) < 0:
+    if obter_freq_reproducao(arg) <= 0 or obter_freq_alimentacao(arg) < 0 or\
+    obter_fome(arg) < 0 or obter_idade(arg) < 0:
         return False
     return True
 
-def eh_predador(aAnimal):
-    if not eh_animal(aAnimal):
+def eh_predador(animal):
+    """eh_predador: animal → booleano
+    Esta função avalia se o animal que recebe
+    se trata de um predador.
+    """
+    if not eh_animal(animal):
         return False
-    if obter_freq_alimentacao(aAnimal) != 0:
+    if obter_freq_alimentacao(animal) != 0:
         return True
     return False
 
-def eh_presa(aAnimal):
-    if not eh_animal(aAnimal):
+def eh_presa(animal):
+    """eh_presa: animal → booleano
+    Esta função avalia se o animal que recebe
+    se trata de uma presa.
+    """
+    if not eh_animal(animal):
         return False
-    return not eh_predador(aAnimal)
+    return not eh_predador(animal)
 
 # Teste
 
-def animais_iguais(aAnimal1, aAnimal2):
-    if not eh_animal(aAnimal1) or not eh_animal(aAnimal2):
+def animais_iguais(animal1, animal2):
+    """ animais_iguais: animal × animal → booleano
+    Esta função avalia se dois animais são iguais.
+    """
+    if not eh_animal(animal1) or not eh_animal(animal2):
         return False
-    if obter_especie(aAnimal1) != obter_especie(aAnimal2):
+    if obter_especie(animal1) != obter_especie(animal2):
         return False
-    if obter_freq_reproducao(aAnimal1) != obter_freq_reproducao(aAnimal2):
+    if obter_freq_reproducao(animal1) != obter_freq_reproducao(animal2):
         return False
-    if obter_freq_alimentacao(aAnimal1) != obter_freq_alimentacao(aAnimal2):
+    if obter_freq_alimentacao(animal1) != obter_freq_alimentacao(animal2):
         return False
-    if obter_idade(aAnimal1) != obter_idade(aAnimal2):
+    if obter_idade(animal1) != obter_idade(animal2):
         return False
-    if obter_fome(aAnimal1) != obter_fome(aAnimal2):
+    if obter_fome(animal1) != obter_fome(animal2):
         return False
     return True
 
 # Transformadores
 
-def animal_para_char(aAnimal):
-    if eh_predador(aAnimal):
-        return obter_especie(aAnimal)[0].upper()
-    return obter_especie(aAnimal)[0].lower()
+def animal_para_char(animal):
+    """ animal_para_char : animal → str
+    Esta função devolve uma cadeia de caracteres constituída
+    pela letra inicial da espécie do animal recebido como argumento,
+    em letras maiúsculas caso seja um predador e em letras minúsculas
+    caso contrário.
+    """
+    if eh_predador(animal):
+        return obter_especie(animal)[0].upper()
+    return obter_especie(animal)[0].lower()
 
-def animal_para_str(aAnimal):
-    sStrAnimal = obter_especie(aAnimal) + " [" + str(obter_idade(aAnimal)) +"/" + str(obter_freq_reproducao(aAnimal))
-    if eh_predador(aAnimal):
-        return sStrAnimal + ";" + str(obter_fome(aAnimal)) + "/" + str(obter_freq_alimentacao(aAnimal)) + "]"
-    return sStrAnimal + "]"
+def animal_para_str(animal):
+    """ animal_para_str : animal → str
+    Esta função devolve uma cadeia de caracteres na forma
+    'espécie [idade/freq reprodução]', no caso do animal ser uma presa,
+    ou 'espécie [idade/freq reprodução;fome/freq alimentação]',
+    no caso do animal ser um predador, que representa o animal
+    que recebeu como argumento.
+    """
+    # Esta string contém a parte que será comum na representação dos animais,
+    # independentemente destes se tratarem de presas ou predadores. 
+    str_animal = (obter_especie(animal) + " [" + str(obter_idade(animal)) +"/"\
+    + str(obter_freq_reproducao(animal)))
+
+    if eh_predador(animal):
+        return str_animal + ";" + str(obter_fome(animal)) + "/" + str(obter_freq_alimentacao(animal)) + "]"
+    return str_animal + "]"
 
 # Funções de alto nível associadas ao TAD animal
 
